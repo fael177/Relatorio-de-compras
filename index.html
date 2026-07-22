@@ -1,0 +1,796 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<style>
+  :root{
+    --paper:#f2f0e2;
+    --paper-card:#fffdf6;
+    --ink:#1e2b22;
+    --ink-soft:#4a564c;
+    --green:#2f5233;
+    --green-dark:#1f3a24;
+    --green-soft:#e3eade;
+    --red:#7a3030;
+    --red-dark:#5c2222;
+    --amber:#b9822f;
+    --line:#d8d2bd;
+    --shadow: 0 1px 2px rgba(30,43,34,0.06), 0 8px 24px rgba(30,43,34,0.08);
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(30,43,34,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    padding: 28px 20px 60px;
+    min-height:100vh;
+  }
+  .wrap{ max-width:1180px; margin:0 auto; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:24px;
+    flex-wrap:wrap;
+    padding-bottom:22px; margin-bottom:26px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .hero-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--green-dark); font-weight:600; margin:0 0 6px;
+  }
+  .hero h1{
+    font-family:'Fraunces', serif;
+    font-weight:600; font-size:44px; line-height:1.02; margin:0;
+    letter-spacing:-0.01em;
+  }
+  .hero h1 em{ font-style:italic; color:var(--green); font-weight:500; }
+  .hero-sub{ font-size:14.5px; color:var(--ink-soft); margin-top:8px; max-width:460px; }
+  .hero-total{ text-align:right; }
+  .hero-total .label{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); }
+  .hero-total .value{ font-family:'Fraunces',serif; font-size:40px; font-weight:600; color:var(--red-dark); line-height:1.1; }
+
+  /* ---------- TRIP CHIPS ---------- */
+  .trips-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:22px; }
+  .trip-chip{
+    font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:500;
+    padding:8px 14px; border-radius:999px; border:1.5px solid var(--ink);
+    background:var(--paper-card); cursor:pointer; color:var(--ink);
+    transition:.15s; white-space:nowrap;
+  }
+  .trip-chip:hover{ transform:translateY(-1px); box-shadow:var(--shadow); }
+  .trip-chip.active{ background:var(--green); border-color:var(--green); color:#fdf9ee; }
+  .btn{
+    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:13.5px;
+    padding:9px 16px; border-radius:999px; border:1.5px solid var(--ink);
+    background:var(--ink); color:var(--paper-card); cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn.ghost{ background:transparent; color:var(--ink); }
+  .btn.danger{ background:var(--red-dark); border-color:var(--red-dark); }
+  .btn:active{ transform:scale(.97); }
+  .btn:hover{ box-shadow:var(--shadow); }
+
+  /* ---------- MAIN GRID ---------- */
+  .grid{ display:grid; grid-template-columns: 1.05fr 1.3fr; gap:22px; align-items:start; }
+  @media (max-width:920px){ .grid{ grid-template-columns:1fr; } }
+
+  /* ---------- RECEIPT CARD ---------- */
+  .receipt{
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    position:relative;
+    padding:26px 26px 18px;
+    clip-path: polygon(
+      0% 1.2%, 4% 0%, 8% 1.2%, 12% 0%, 16% 1.2%, 20% 0%, 24% 1.2%, 28% 0%, 32% 1.2%, 36% 0%,
+      40% 1.2%, 44% 0%, 48% 1.2%, 52% 0%, 56% 1.2%, 60% 0%, 64% 1.2%, 68% 0%, 72% 1.2%, 76% 0%,
+      80% 1.2%, 84% 0%, 88% 1.2%, 92% 0%, 96% 1.2%, 100% 1.2%,
+      100% 98.8%, 96% 100%, 92% 98.8%, 88% 100%, 84% 98.8%, 80% 100%, 76% 98.8%, 72% 100%,
+      68% 98.8%, 64% 100%, 60% 98.8%, 56% 100%, 52% 98.8%, 48% 100%, 44% 98.8%, 40% 100%,
+      36% 98.8%, 32% 100%, 28% 98.8%, 24% 100%, 20% 98.8%, 16% 100%, 12% 98.8%, 8% 100%, 4% 98.8%, 0% 100%
+    );
+  }
+  .receipt-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; }
+  .receipt-head h2{ font-family:'Fraunces',serif; font-size:22px; margin:0; font-weight:600; }
+  .receipt-date{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--green-dark); font-weight:600; }
+  .receipt-list{ margin-top:14px; }
+  .item-row{
+    display:grid; grid-template-columns: auto 1fr auto auto auto;
+    align-items:center; gap:10px; padding:9px 0;
+    border-bottom:1px dotted var(--line);
+    font-size:14px;
+  }
+  .item-row:last-child{ border-bottom:none; }
+  .item-dot{ width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
+  .item-name{ font-weight:500; }
+  .item-cat{ font-size:10.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; }
+  .item-qty{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-soft); text-align:right; }
+  .item-unit{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-soft); text-align:right; }
+  .item-sub{ font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600; text-align:right; min-width:76px; }
+  .item-del{ background:none;border:none;color:var(--red);cursor:pointer;font-size:15px;padding:0 0 0 4px; visibility:hidden;}
+  .item-row:hover .item-del{ visibility:visible; }
+  .item-row.edit{
+    grid-template-columns: 118px 1fr 54px 78px auto;
+    background:#fbf9ef;
+  }
+  .item-row.edit input, .item-row.edit select{
+    font-family:'IBM Plex Sans',sans-serif; font-size:12.5px; padding:5px 6px;
+    border:1px solid var(--line); border-radius:6px; background:#fffdf7; color:var(--ink); width:100%;
+  }
+  .item-row.edit .item-del{ visibility:visible; }
+  .edit-toggle{
+    background:none; border:1.5px solid var(--ink); border-radius:999px;
+    padding:4px 12px; font-size:11.5px; font-family:'IBM Plex Mono',monospace;
+    cursor:pointer; color:var(--ink);
+  }
+  .edit-toggle.on{ background:var(--amber); border-color:var(--amber); color:#2a1d05; }
+  .receipt-total{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:14px; padding-top:12px; border-top:2px solid var(--ink);
+  }
+  .receipt-total .tlabel{ font-family:'Fraunces',serif; font-weight:600; font-size:15px; }
+  .receipt-total .tval{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:19px; color:var(--red-dark); }
+
+  .add-item-row{ display:grid; grid-template-columns: 1fr 70px 90px auto; gap:8px; margin-top:14px; }
+  .add-item-row input, .add-item-row select{
+    font-family:'IBM Plex Sans',sans-serif; font-size:13px; padding:7px 8px;
+    border:1px solid var(--line); border-radius:6px; background:#fbfaf4; color:var(--ink);
+  }
+
+  /* ---------- ANALYSIS PANEL ---------- */
+  .stats-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+  @media (max-width:640px){ .stats-row{ grid-template-columns:repeat(2,1fr);} }
+  .stat-card{
+    background:var(--paper-card); border:1px solid var(--line); border-radius:10px;
+    padding:14px 14px; box-shadow:var(--shadow);
+  }
+  .stat-card .slabel{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); }
+  .stat-card .sval{ font-family:'Fraunces',serif; font-size:22px; font-weight:600; margin-top:4px; color:var(--green-dark); }
+  .stat-card.accent .sval{ color:var(--red-dark); }
+
+  .panel{
+    background:var(--paper-card); border:1px solid var(--line); border-radius:12px;
+    padding:18px 18px 10px; box-shadow:var(--shadow); margin-bottom:16px;
+  }
+  .panel h3{ font-family:'Fraunces',serif; font-size:16.5px; margin:0 0 4px; font-weight:600; }
+  .panel .phint{ font-size:12px; color:var(--ink-soft); margin:0 0 10px; }
+  .chart-box{ position:relative; height:210px; }
+  .chart-box.tall{ height:250px; }
+
+  .empty-note{ font-size:13px; color:var(--ink-soft); text-align:center; padding:18px 0; }
+
+  /* ---------- MODAL ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(30,43,34,.45); display:none;
+    align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .overlay.open{ display:flex; }
+  .modal{
+    background:var(--paper-card); border-radius:14px; padding:24px; width:100%; max-width:480px;
+    max-height:86vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  .modal h3{ font-family:'Fraunces',serif; font-size:20px; margin:0 0 14px; }
+  .modal label{ font-size:12px; font-weight:600; color:var(--ink-soft); display:block; margin:10px 0 4px; }
+  .modal input, .modal select{
+    width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:7px;
+    font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; background:#fbfaf4;
+  }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+  .close-x{ float:right; cursor:pointer; font-size:18px; background:none;border:none;color:var(--ink-soft); }
+
+  .footer-note{ text-align:center; font-size:11.5px; color:var(--ink-soft); margin-top:30px; font-family:'IBM Plex Mono',monospace; }
+
+  /* ---------- DIAGNÓSTICO CRÍTICO ---------- */
+  .diag-grid{ display:grid; grid-template-columns:230px 1fr; gap:22px; }
+  @media (max-width:780px){ .diag-grid{ grid-template-columns:1fr; } }
+  .best-day-card{
+    background:var(--green-dark); color:#f3f0e4; border-radius:10px; padding:16px;
+    display:flex; flex-direction:column; gap:4px; height:100%;
+  }
+  .best-day-card .slabel{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:#c9d8c6; }
+  .best-day-card .sval{ font-family:'Fraunces',serif; font-size:24px; font-weight:600; }
+  .best-day-card .sdesc{ font-size:12px; color:#d7e2d1; line-height:1.4; margin-top:2px; }
+  .summary-line{
+    font-size:13.5px; line-height:1.55; padding:10px 12px; border-radius:8px;
+    background:#f6f2e2; margin-bottom:10px; border:1px solid var(--line);
+  }
+  .summary-line b.up{ color:var(--red-dark); }
+  .summary-line b.down{ color:var(--green-dark); }
+  .change-list{ display:flex; flex-direction:column; }
+  .change-row{
+    display:grid; grid-template-columns: 1fr auto auto; gap:10px; align-items:center;
+    padding:8px 0; border-bottom:1px dotted var(--line); font-size:13px;
+  }
+  .change-row:last-child{ border-bottom:none; }
+  .change-row .cname{ font-weight:500; }
+  .change-row .cprices{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; }
+  .change-row .cpct{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px; min-width:56px; text-align:right; }
+  .change-row .cpct.up{ color:var(--red-dark); }
+  .change-row .cpct.down{ color:var(--green-dark); }
+
+  .save-toast{
+    position:fixed; bottom:18px; right:18px; background:var(--ink); color:#f3f0e4;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; padding:9px 14px; border-radius:8px;
+    opacity:0; transform:translateY(8px); transition:opacity .25s, transform .25s; pointer-events:none;
+    z-index:80; box-shadow:var(--shadow);
+  }
+  .save-toast.show{ opacity:1; transform:translateY(0); }
+</style>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <p class="hero-eyebrow">Caderneta de compras &middot; controle doméstico</p>
+      <h1>A conta <em>certa</em><br/>do mercado.</h1>
+      <p class="hero-sub">Cada ida ao mercado vira uma página. Some, compare preços e veja para onde o dinheiro está indo — sem abrir planilha nenhuma.</p>
+    </div>
+    <div class="hero-total">
+      <div class="label">Total desta compra</div>
+      <div class="value" id="heroTotal">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="trips-row" id="tripsRow"></div>
+
+  <div class="panel" id="diagPanel" style="margin-bottom:22px;"></div>
+
+  <div class="grid">
+    <div>
+      <div class="receipt" id="receiptCard"></div>
+    </div>
+
+    <div>
+      <div class="stats-row" id="statsRow"></div>
+
+      <div class="panel">
+        <h3>Gasto por compra</h3>
+        <p class="phint">Comparação do total gasto em cada visita ao mercado.</p>
+        <div class="chart-box"><canvas id="chartByTrip"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <h3>Para onde o dinheiro vai</h3>
+        <p class="phint">Distribuição por categoria — todas as compras somadas.</p>
+        <div class="chart-box"><canvas id="chartCategory"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <h3>Preço foi ou não subiu?</h3>
+        <p class="phint">Preço unitário de itens que aparecem em mais de uma compra.</p>
+        <div class="chart-box tall"><canvas id="chartPriceTrend"></canvas></div>
+        <div class="empty-note" id="priceTrendEmpty" style="display:none;">Cadastre um mesmo produto em duas ou mais compras para ver a comparação de preço aqui.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">seus dados ficam salvos automaticamente, mesmo se atualizar ou fechar a página</p>
+</div>
+
+<div class="save-toast" id="saveToast">salvo automaticamente ✓</div>
+
+<div class="overlay" id="tripOverlay">
+  <div class="modal">
+    <button class="close-x" onclick="closeTripModal()">&times;</button>
+    <h3>Nova compra</h3>
+    <label>Data</label>
+    <input type="date" id="newTripDate"/>
+    <label>Duplicar itens de</label>
+    <select id="dupFromTrip">
+      <option value="">Começar do zero</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeTripModal()">Cancelar</button>
+      <button class="btn" onclick="createTrip()">Criar compra</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATS = {
+  'Carnes':      '#7a3030',
+  'Hortifruti':  '#3d7a3f',
+  'Laticínios/Ovos': '#b9822f',
+  'Mercearia':   '#2f5233',
+  'Limpeza/Higiene': '#5c6f9e',
+  'Outros':      '#8a8371'
+};
+
+function guessCategory(name){
+  const n = name.toLowerCase();
+  if(/peito|frango|carne|linguiça|linguica|bovina|suín|suin|bacon|peixe|frang/.test(n)) return 'Carnes';
+  if(/ovo/.test(n)) return 'Laticínios/Ovos';
+  if(/leite|queijo|iogurte|manteiga|requeijão|requeijao/.test(n)) return 'Laticínios/Ovos';
+  if(/uva|batata|cenoura|alho|cebola|tomate|banana|maçã|maca|laranja|verdura|legume|fruta|alface/.test(n)) return 'Hortifruti';
+  if(/papel|sabão|sabao|detergente|higien|amaciante|desinfetante|esponja/.test(n)) return 'Limpeza/Higiene';
+  if(/arroz|feijão|feijao|óleo|oleo|macarrão|macarrao|açúcar|acucar|sal|café|cafe|farinha/.test(n)) return 'Mercearia';
+  return 'Outros';
+}
+
+const SEED = [{
+  id:'seed1',
+  date:'2026-07-22',
+  items:[
+    {name:'Peito',            qty:4, unit:15.98, cat:'Carnes'},
+    {name:'Óleo',             qty:1, unit:6.28,  cat:'Mercearia'},
+    {name:'Arroz',            qty:1, unit:13.98, cat:'Mercearia'},
+    {name:'Uva',              qty:1, unit:4.98,  cat:'Hortifruti'},
+    {name:'Cartela de ovo',   qty:1, unit:16.98, cat:'Laticínios/Ovos'},
+    {name:'Papel Higiênico',  qty:1, unit:5.99,  cat:'Limpeza/Higiene'},
+    {name:'Macarrão',         qty:3, unit:1.79,  cat:'Mercearia'},
+    {name:'Alho',             qty:1, unit:3.50,  cat:'Hortifruti'},
+    {name:'Batata',           qty:1, unit:3.34,  cat:'Hortifruti'},
+    {name:'Cenoura',          qty:1, unit:2.91,  cat:'Hortifruti'}
+  ]
+}];
+
+let trips = [];
+let currentTripId = null;
+let charts = {};
+let editMode = false;
+
+function fmt(v){
+  return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function tripTotal(t){ return t.items.reduce((s,i)=> s + i.qty*i.unit, 0); }
+function fmtDate(d){
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+async function loadData(){
+  try{
+    const res = await window.storage.get('compras', false);
+    if(res && res.value){
+      trips = JSON.parse(res.value);
+    } else {
+      trips = SEED;
+      await saveData();
+    }
+  }catch(e){
+    trips = SEED;
+    try{ await saveData(); }catch(e2){}
+  }
+  if(trips.length){ currentTripId = trips[trips.length-1].id; }
+  renderAll();
+}
+
+async function saveData(){
+  try{
+    await window.storage.set('compras', JSON.stringify(trips), false);
+    showToast();
+  }catch(e){ console.error('erro ao salvar', e); }
+}
+
+let toastTimer=null;
+function showToast(){
+  const el = document.getElementById('saveToast');
+  if(!el) return;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('show'), 1600);
+}
+
+function getTrip(id){ return trips.find(t=>t.id===id); }
+
+function renderAll(){
+  renderTripsRow();
+  renderReceipt();
+  renderStats();
+  renderDiagnosis();
+  renderChartByTrip();
+  renderChartCategory();
+  renderChartPriceTrend();
+}
+
+function renderTripsRow(){
+  const row = document.getElementById('tripsRow');
+  row.innerHTML = '';
+  trips.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(t=>{
+    const chip = document.createElement('button');
+    chip.className = 'trip-chip' + (t.id===currentTripId ? ' active' : '');
+    chip.textContent = fmtDate(t.date);
+    chip.onclick = ()=>{ currentTripId = t.id; editMode = false; renderAll(); };
+    row.appendChild(chip);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn';
+  addBtn.innerHTML = '+ nova compra';
+  addBtn.onclick = openTripModal;
+  row.appendChild(addBtn);
+
+  if(trips.length){
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn danger';
+    delBtn.textContent = 'apagar esta compra';
+    delBtn.onclick = deleteCurrentTrip;
+    row.appendChild(delBtn);
+  }
+}
+
+function renderReceipt(){
+  const card = document.getElementById('receiptCard');
+  const t = getTrip(currentTripId);
+  if(!t){
+    card.innerHTML = '<p class="empty-note">Nenhuma compra cadastrada ainda. Clique em "+ nova compra".</p>';
+    document.getElementById('heroTotal').textContent = fmt(0);
+    return;
+  }
+  const total = tripTotal(t);
+  document.getElementById('heroTotal').textContent = fmt(total);
+
+  let html = `
+    <div class="receipt-head">
+      <h2>Nota da compra</h2>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="receipt-date">${fmtDate(t.date)}</div>
+        <button class="edit-toggle ${editMode?'on':''}" onclick="toggleEditMode()">${editMode ? '✓ concluir edição' : '✎ editar itens'}</button>
+      </div>
+    </div>
+    <div class="receipt-list">`;
+
+  if(editMode){
+    const catOptions = Object.keys(CATS).map(c=>`<option value="${c}">${c}</option>`).join('');
+    t.items.forEach((it, idx)=>{
+      html += `
+        <div class="item-row edit">
+          <select onchange="updateItem(${idx},'cat',this.value)">
+            ${Object.keys(CATS).map(c=>`<option value="${c}" ${c===it.cat?'selected':''}>${c}</option>`).join('')}
+          </select>
+          <input type="text" value="${it.name}" onchange="updateItem(${idx},'name',this.value)"/>
+          <input type="number" min="0" step="1" value="${it.qty}" onchange="updateItem(${idx},'qty',parseFloat(this.value)||0)"/>
+          <input type="number" min="0" step="0.01" value="${it.unit}" onchange="updateItem(${idx},'unit',parseFloat(this.value)||0)"/>
+          <button class="item-del" onclick="deleteItem(${idx})">&times;</button>
+        </div>`;
+    });
+  } else {
+    t.items.forEach((it, idx)=>{
+      const sub = it.qty * it.unit;
+      html += `
+        <div class="item-row">
+          <div class="item-dot" style="background:${CATS[it.cat]||CATS['Outros']}"></div>
+          <div>
+            <div class="item-name">${it.name}</div>
+            <div class="item-cat">${it.cat}</div>
+          </div>
+          <div class="item-qty">${it.qty}x</div>
+          <div class="item-unit">${fmt(it.unit)}</div>
+          <div style="display:flex;align-items:center;">
+            <div class="item-sub">${fmt(sub)}</div>
+            <button class="item-del" onclick="deleteItem(${idx})">&times;</button>
+          </div>
+        </div>`;
+    });
+  }
+
+  html += `</div>
+    <div class="receipt-total">
+      <div class="tlabel">Total</div>
+      <div class="tval">${fmt(total)}</div>
+    </div>
+    <div class="add-item-row">
+      <input id="newItemName" placeholder="produto"/>
+      <input id="newItemQty" type="number" min="0" step="1" value="1" placeholder="qtd"/>
+      <input id="newItemUnit" type="number" min="0" step="0.01" placeholder="R$ unid."/>
+      <button class="btn ghost" onclick="addItem()">+ item</button>
+    </div>`;
+
+  card.innerHTML = html;
+}
+
+function addItem(){
+  const t = getTrip(currentTripId);
+  if(!t) return;
+  const name = document.getElementById('newItemName').value.trim();
+  const qty = parseFloat(document.getElementById('newItemQty').value) || 1;
+  const unit = parseFloat(document.getElementById('newItemUnit').value) || 0;
+  if(!name || unit<=0) return;
+  t.items.push({name, qty, unit, cat: guessCategory(name)});
+  saveData();
+  renderAll();
+}
+
+function deleteItem(idx){
+  const t = getTrip(currentTripId);
+  if(!t) return;
+  t.items.splice(idx,1);
+  saveData();
+  renderAll();
+}
+
+function toggleEditMode(){
+  editMode = !editMode;
+  renderReceipt();
+}
+
+function updateItem(idx, field, value){
+  const t = getTrip(currentTripId);
+  if(!t || !t.items[idx]) return;
+  t.items[idx][field] = value;
+  saveData();
+  renderAll();
+}
+
+function deleteCurrentTrip(){
+  trips = trips.filter(t=>t.id!==currentTripId);
+  currentTripId = trips.length ? trips[trips.length-1].id : null;
+  saveData();
+  renderAll();
+}
+
+function openTripModal(){
+  document.getElementById('newTripDate').value = new Date().toISOString().slice(0,10);
+  const sel = document.getElementById('dupFromTrip');
+  sel.innerHTML = '<option value="">Começar do zero</option>' +
+    trips.slice().sort((a,b)=>b.date.localeCompare(a.date))
+      .map(t=>`<option value="${t.id}">Igual à compra de ${fmtDate(t.date)}</option>`).join('');
+  document.getElementById('tripOverlay').classList.add('open');
+}
+function closeTripModal(){ document.getElementById('tripOverlay').classList.remove('open'); }
+function createTrip(){
+  const date = document.getElementById('newTripDate').value;
+  if(!date) return;
+  const dupId = document.getElementById('dupFromTrip').value;
+  const id = 't' + Date.now();
+  let items = [];
+  if(dupId){
+    const src = getTrip(dupId);
+    if(src) items = src.items.map(it=>({...it}));
+  }
+  trips.push({id, date, items});
+  currentTripId = id;
+  editMode = false;
+  saveData();
+  closeTripModal();
+  renderAll();
+}
+
+function renderStats(){
+  const row = document.getElementById('statsRow');
+  const totalGeral = trips.reduce((s,t)=> s + tripTotal(t), 0);
+  const media = trips.length ? totalGeral/trips.length : 0;
+  let maisCaro = {name:'—', v:0};
+  trips.forEach(t=> t.items.forEach(it=>{
+    const sub = it.qty*it.unit;
+    if(sub>maisCaro.v) maisCaro = {name:it.name, v:sub};
+  }));
+
+  row.innerHTML = `
+    <div class="stat-card">
+      <div class="slabel">Total geral</div>
+      <div class="sval">${fmt(totalGeral)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="slabel">Média por compra</div>
+      <div class="sval">${fmt(media)}</div>
+    </div>
+    <div class="stat-card accent">
+      <div class="slabel">Item mais caro</div>
+      <div class="sval" style="font-size:16px;">${maisCaro.name}</div>
+      <div class="item-cat">${fmt(maisCaro.v)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="slabel">Compras registradas</div>
+      <div class="sval">${trips.length}</div>
+    </div>`;
+}
+
+const WEEKDAYS = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+
+function computePriceChanges(){
+  const byName = {};
+  trips.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(t=>{
+    t.items.forEach(it=>{
+      if(!byName[it.name]) byName[it.name] = [];
+      byName[it.name].push({date:t.date, unit:it.unit});
+    });
+  });
+  return Object.keys(byName)
+    .filter(n=>byName[n].length>1)
+    .map(name=>{
+      const list = byName[name];
+      const first = list[0], last = list[list.length-1];
+      const pct = first.unit>0 ? ((last.unit-first.unit)/first.unit*100) : 0;
+      return { name, first: first.unit, last: last.unit, firstDate:first.date, lastDate:last.date, pct };
+    })
+    .sort((a,b)=> b.pct - a.pct);
+}
+
+function findBestDay(){
+  const changes = computePriceChanges();
+  const repeatedNames = new Set(changes.map(c=>c.name));
+  if(!repeatedNames.size) return null;
+  let best = null;
+  trips.forEach(t=>{
+    const relevant = t.items.filter(it=>repeatedNames.has(it.name));
+    if(!relevant.length) return;
+    const avg = relevant.reduce((s,it)=>s+it.unit,0)/relevant.length;
+    if(!best || avg < best.avg){ best = {date:t.date, avg, count:relevant.length}; }
+  });
+  return best;
+}
+
+function findBestWeekday(){
+  const byWd = {};
+  trips.forEach(t=>{
+    const wd = new Date(t.date+'T00:00:00').getDay();
+    if(!byWd[wd]) byWd[wd] = [];
+    byWd[wd].push(tripTotal(t));
+  });
+  const wdKeys = Object.keys(byWd);
+  if(wdKeys.length<2) return null;
+  let best=null;
+  wdKeys.forEach(wd=>{
+    const vals = byWd[wd];
+    const avg = vals.reduce((s,v)=>s+v,0)/vals.length;
+    if(!best || avg<best.avg) best = {wd:WEEKDAYS[wd], avg, count:vals.length};
+  });
+  return best;
+}
+
+function renderDiagnosis(){
+  const panel = document.getElementById('diagPanel');
+  const changes = computePriceChanges();
+  const bestDay = findBestDay();
+  const bestWeekday = findBestWeekday();
+
+  if(!changes.length){
+    panel.innerHTML = `
+      <h3>Análise crítica</h3>
+      <p class="phint">Diagnóstico de preços e melhor dia de compra.</p>
+      <div class="empty-note">Cadastre o mesmo produto em pelo menos duas compras diferentes para liberarmos a análise de aumento de preço e o melhor dia para comprar.</div>`;
+    return;
+  }
+
+  const avgPct = changes.reduce((s,c)=>s+c.pct,0)/changes.length;
+  const dirClass = avgPct>=0 ? 'up' : 'down';
+  const dirWord = avgPct>=0 ? 'mais caros' : 'mais baratos';
+
+  let bestHtml = '';
+  if(bestDay){
+    bestHtml = `
+      <div class="best-day-card">
+        <div class="slabel">🏆 melhor dia registrado</div>
+        <div class="sval">${fmtDate(bestDay.date)}</div>
+        <div class="sdesc">preço médio pago nos itens recorrentes: ${fmt(bestDay.avg)} (${bestDay.count} ${bestDay.count===1?'item comparável':'itens comparáveis'})</div>
+        ${bestWeekday ? `<div class="sdesc" style="margin-top:8px;border-top:1px solid rgba(255,255,255,.15);padding-top:8px;">de modo geral, <b>${bestWeekday.wd}</b> costuma sair mais barato pra você (média de ${fmt(bestWeekday.avg)} por compra)</div>` : ''}
+      </div>`;
+  } else {
+    bestHtml = `<div class="best-day-card"><div class="slabel">🏆 melhor dia</div><div class="sdesc">ainda sem dados suficientes — compare mais itens repetidos entre compras.</div></div>`;
+  }
+
+  const changesHtml = changes.map(c=>{
+    const cls = c.pct>=0 ? 'up' : 'down';
+    const arrow = c.pct>=0 ? '▲' : '▼';
+    const sign = c.pct>=0 ? '+' : '';
+    return `
+      <div class="change-row">
+        <div class="cname">${c.name}</div>
+        <div class="cprices">${fmt(c.first)} (${fmtDate(c.firstDate)}) → ${fmt(c.last)} (${fmtDate(c.lastDate)})</div>
+        <div class="cpct ${cls}">${arrow} ${sign}${c.pct.toFixed(1)}%</div>
+      </div>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <h3>Análise crítica</h3>
+    <p class="phint">Comparando a primeira e a última vez que você comprou cada produto.</p>
+    <div class="diag-grid">
+      ${bestHtml}
+      <div>
+        <div class="summary-line">No geral, os itens que se repetem na sua caderneta estão, em média, <b class="${dirClass}">${Math.abs(avgPct).toFixed(1)}% ${dirWord}</b> desde a primeira vez que você os comprou.</div>
+        <div class="change-list">${changesHtml}</div>
+      </div>
+    </div>`;
+}
+
+function destroyChart(key){
+  if(charts[key]){ charts[key].destroy(); delete charts[key]; }
+}
+
+function renderChartByTrip(){
+  destroyChart('byTrip');
+  const sorted = trips.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const ctx = document.getElementById('chartByTrip').getContext('2d');
+  charts.byTrip = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: sorted.map(t=>fmtDate(t.date)),
+      datasets:[{
+        data: sorted.map(t=>tripTotal(t)),
+        backgroundColor: sorted.map(t=> t.id===currentTripId ? '#7a3030' : '#2f5233'),
+        borderRadius:6,
+        maxBarThickness:46
+      }]
+    },
+    options:{
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>fmt(c.raw)}}},
+      scales:{
+        y:{ grid:{color:'#e7e2d0'}, ticks:{callback:v=>'R$'+v} },
+        x:{ grid:{display:false} }
+      }
+    }
+  });
+}
+
+function renderChartCategory(){
+  destroyChart('category');
+  const totals = {};
+  trips.forEach(t=> t.items.forEach(it=>{
+    totals[it.cat] = (totals[it.cat]||0) + it.qty*it.unit;
+  }));
+  const labels = Object.keys(totals);
+  const ctx = document.getElementById('chartCategory').getContext('2d');
+  charts.category = new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels,
+      datasets:[{
+        data: labels.map(l=>totals[l]),
+        backgroundColor: labels.map(l=>CATS[l]||CATS['Outros']),
+        borderColor:'#fffdf6',
+        borderWidth:2
+      }]
+    },
+    options:{
+      plugins:{ legend:{position:'right', labels:{boxWidth:10, font:{size:11}}},
+        tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}`}} },
+      cutout:'62%'
+    }
+  });
+}
+
+function renderChartPriceTrend(){
+  destroyChart('priceTrend');
+  const byName = {};
+  trips.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(t=>{
+    t.items.forEach(it=>{
+      if(!byName[it.name]) byName[it.name] = [];
+      byName[it.name].push({date:t.date, unit:it.unit});
+    });
+  });
+  const repeated = Object.keys(byName).filter(n=>byName[n].length>1);
+  const emptyEl = document.getElementById('priceTrendEmpty');
+  const canvas = document.getElementById('chartPriceTrend');
+  if(!repeated.length){
+    emptyEl.style.display='block';
+    canvas.style.display='none';
+    return;
+  }
+  emptyEl.style.display='none';
+  canvas.style.display='block';
+
+  const allDates = [...new Set(trips.map(t=>t.date))].sort();
+  const palette = ['#7a3030','#2f5233','#b9822f','#5c6f9e','#8a4fae','#3d7a3f'];
+  const ctx = canvas.getContext('2d');
+  charts.priceTrend = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: allDates.map(fmtDate),
+      datasets: repeated.slice(0,6).map((name,idx)=>{
+        const map = {};
+        byName[name].forEach(e=> map[e.date]=e.unit);
+        return {
+          label:name,
+          data: allDates.map(d=> map[d] ?? null),
+          borderColor: palette[idx%palette.length],
+          backgroundColor: palette[idx%palette.length],
+          spanGaps:true,
+          tension:.25,
+          pointRadius:4
+        };
+      })
+    },
+    options:{
+      plugins:{ legend:{position:'bottom', labels:{boxWidth:10,font:{size:10.5}}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}`}} },
+      scales:{ y:{ grid:{color:'#e7e2d0'}, ticks:{callback:v=>'R$'+v} }, x:{grid:{display:false}} }
+    }
+  });
+}
+
+loadData();
+</script>
